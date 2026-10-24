@@ -10,7 +10,7 @@ RUN /opt/venv/bin/python -m src.train.train --out /build/models/model.joblib
 
 # ---------- Stage 2: runtime (small, no build leftovers, non-root) ----------
 FROM python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727 AS runtime
-RUN useradd --create-home --uid 10001 appuser
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* && useradd --create-home --uid 10001 appuser
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /build/models ./models
