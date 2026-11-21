@@ -1,5 +1,7 @@
 """Churn prediction API."""
+import json
 import os
+from pathlib import Path
 from typing import Literal
 
 import joblib
@@ -21,15 +23,18 @@ class Customer(BaseModel):
 
 app = FastAPI(title="AI381 churn API")
 model = joblib.load(MODEL_PATH)
+# which model is running: commit, MLflow run ID, data hash (written by scripts/promote.py)
+META_PATH = Path(MODEL_PATH).parent / "metadata.json"
+meta = json.loads(META_PATH.read_text()) if META_PATH.exists() else {"model_version": "local"}
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", **meta}
 
 
 @app.post("/predict")
 def predict(customer: Customer):
     X = pd.DataFrame([customer.model_dump()])[FEATURES]
     p = float(model.predict_proba(X)[0, 1])
-    return {"churn_probability": round(p, 3)}
+    return {"churn_probability": round(p, 3), "model_version": meta.get("model_version")}

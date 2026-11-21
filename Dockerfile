@@ -6,7 +6,16 @@ COPY requirements.txt .
 RUN python -m venv /opt/venv && /opt/venv/bin/pip install -r requirements.txt
 COPY src/ src/
 COPY churn_v2.csv .
-RUN /opt/venv/bin/python -m src.train.train --out /build/models/model.joblib
+COPY artifacts/ artifacts/
+ARG GIT_SHA=local
+# Lab 3: package the @champion model that scripts/promote.py exported to artifacts/.
+# No champion yet (Lab 2 style): train inside the image instead.
+RUN if [ -f artifacts/model.joblib ]; then \
+      mkdir -p models && cp artifacts/model.joblib artifacts/metadata.json models/ && \
+      /opt/venv/bin/python -c "import json,sys; p='models/metadata.json'; m=json.load(open(p)); m['model_version']=sys.argv[1][:7]; json.dump(m,open(p,'w'))" "$GIT_SHA"; \
+    else \
+      GIT_SHA=$GIT_SHA /opt/venv/bin/python -m src.train.train --out /build/models/model.joblib; \
+    fi
 
 # ---------- Stage 2: runtime (small, no build leftovers, non-root) ----------
 FROM python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727 AS runtime

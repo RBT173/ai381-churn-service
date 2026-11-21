@@ -2,3 +2,11 @@
 __pycache__/
 models/
 *.pyc
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/champion.json
+!artifacts/metadata.json
+!artifacts/model.joblib
+mlflow.db
+mlruns/
+mlartifacts/

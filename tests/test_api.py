@@ -18,7 +18,9 @@ VALID = {
 def test_health_contract():
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    body = r.json()
+    assert body["status"] == "ok"
+    assert "model_version" in body
 
 
 def test_predict_contract():
