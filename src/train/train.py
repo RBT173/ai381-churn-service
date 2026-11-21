@@ -1,5 +1,7 @@
 """Train the churn model and save it as models/model.joblib."""
 import argparse
+import json
+import os
 from pathlib import Path
 
 import joblib
@@ -47,6 +49,8 @@ def main() -> None:
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, args.out)
+    meta = {"model_version": os.getenv("GIT_SHA", "local")[:7], "mlflow_run_id": None, "model": "logreg"}
+    (Path(args.out).parent / "metadata.json").write_text(json.dumps(meta, indent=2))
     print("saved", args.out)
 
 

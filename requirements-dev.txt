@@ -2,3 +2,4 @@
 pytest
 httpx
 ruff
+mlflow==3.17.0
